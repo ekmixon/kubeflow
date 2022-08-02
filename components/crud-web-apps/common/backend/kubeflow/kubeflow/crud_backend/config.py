@@ -16,8 +16,10 @@ class BackendMode(enum.Enum):
 
 def dev_mode_enabled():
     env = current_app.config.get("ENV")
-    return (env == BackendMode.DEVELOPMENT_FULL.value or
-            env == BackendMode.DEVELOPMENT.value)
+    return env in [
+        BackendMode.DEVELOPMENT_FULL.value,
+        BackendMode.DEVELOPMENT.value,
+    ]
 
 
 def get_config(mode):
@@ -29,11 +31,11 @@ def get_config(mode):
         BackendMode.PRODUCTION_FULL.value: ProdConfig,
     }
 
-    cfg_class = config_classes.get(mode)
-    if not cfg_class:
+    if cfg_class := config_classes.get(mode):
+        return cfg_class()
+    else:
         raise RuntimeError("Backend mode '%s' is not implemented. Choose one"
                            " of %s" % (mode, list(config_classes.keys())))
-    return cfg_class()
 
 
 class Config(object):

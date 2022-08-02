@@ -40,7 +40,7 @@ def get_platform_app_name(app_path):
       elif plugin.get("kind", "") == "KfExistingArriktoPlugin":
         platform = "existing_arrikto"
   else:
-    raise RuntimeError("Unknown version: " + apiVersion[-1])
+    raise RuntimeError(f"Unknown version: {apiVersion[-1]}")
   return platform, app_name
 
 
@@ -142,10 +142,9 @@ def test_kf_is_ready(record_xml_attribute, namespace, use_basic_auth, use_istio,
     stateful_set_names.extend(["kfserving-controller-manager"])
     if use_basic_auth:
       deployment_names.extend(["basic-auth-login"])
-      ingress_related_stateful_sets.extend(["backend-updater"])
     else:
       ingress_related_deployments.extend(["iap-enabler"])
-      ingress_related_stateful_sets.extend(["backend-updater"])
+    ingress_related_stateful_sets.extend(["backend-updater"])
   elif platform == "existing_arrikto":
     deployment_names.extend(["dex"])
     ingress_related_deployments.extend(["authservice"])
@@ -207,24 +206,25 @@ def test_gcp_access(record_xml_attribute, namespace, app_path, project):
     # Create the Cloud IAM service object
     service = googleapiclient.discovery.build('iam', 'v1', credentials=cred)
 
-    userSa = 'projects/%s/serviceAccounts/%s-user@%s.iam.gserviceaccount.com' % (project, app_name, project)
-    adminSa = 'serviceAccount:%s-admin@%s.iam.gserviceaccount.com' % (app_name, project)
+    userSa = f'projects/{project}/serviceAccounts/{app_name}-user@{project}.iam.gserviceaccount.com'
+    adminSa = f'serviceAccount:{app_name}-admin@{project}.iam.gserviceaccount.com'
 
     request = service.projects().serviceAccounts().getIamPolicy(resource=userSa)
     response = request.execute()
-    roleToMembers = {}
-    for binding in response['bindings']:
-      roleToMembers[binding['role']] = set(binding['members'])
-
+    roleToMembers = {
+        binding['role']: set(binding['members'])
+        for binding in response['bindings']
+    }
     if 'roles/owner' not in roleToMembers:
-      raise Exception("roles/owner missing in iam-policy of %s" % userSa)
+      raise Exception(f"roles/owner missing in iam-policy of {userSa}")
 
     if adminSa not in roleToMembers['roles/owner']:
       raise Exception("Admin %v should be owner of user %s" % (adminSa, userSa))
 
     workloadIdentityRole = 'roles/iam.workloadIdentityUser'
     if workloadIdentityRole not in roleToMembers:
-      raise Exception("roles/iam.workloadIdentityUser missing in iam-policy of %s" % userSa)
+      raise Exception(
+          f"roles/iam.workloadIdentityUser missing in iam-policy of {userSa}")
 
 
 if __name__ == "__main__":

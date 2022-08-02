@@ -82,23 +82,17 @@ def cluster_deletion_script(request):
 def build_and_apply(request):
   value = request.config.getoption("--build_and_apply").lower()
 
-  if value in ["t", "true"]:
-    return True
-  return False
+  return value in ["t", "true"]
 
 
 @pytest.fixture
 def use_basic_auth(request):
   value = request.config.getoption("--use_basic_auth").lower()
 
-  if value in ["t", "true"]:
-    return True
-  return False
+  return value in ["t", "true"]
 
 @pytest.fixture
 def use_istio(request):
   value = request.config.getoption("--use_istio").lower()
 
-  if value in ["t", "true"]:
-    return True
-  return False
+  return value in ["t", "true"]

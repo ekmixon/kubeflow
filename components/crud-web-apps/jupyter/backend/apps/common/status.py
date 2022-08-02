@@ -88,11 +88,14 @@ def find_error_event(notebook_events):
             Insufficient cpu (originated in pod)
 
     """
-    for e in sorted(notebook_events, key=event_timestamp, reverse=True):
-        if e.type == EVENT_TYPE_WARNING:
-            return status.STATUS_PHASE.WAITING, e.message
-
-    return None, None
+    return next(
+        (
+            (status.STATUS_PHASE.WAITING, e.message)
+            for e in sorted(notebook_events, key=event_timestamp, reverse=True)
+            if e.type == EVENT_TYPE_WARNING
+        ),
+        (None, None),
+    )
 
 
 def event_timestamp(event):

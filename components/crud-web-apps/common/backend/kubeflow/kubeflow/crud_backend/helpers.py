@@ -23,11 +23,11 @@ def get_prefixed_index_html():
     log.info("Setting the <base> to reflect the prefix: %s", prefix)
     with open(os.path.join(static_dir, "index.html"), "r") as f:
         index_html = f.read()
-        index_prefixed = re.sub(
-            r"\<base href=\".*\".*\>", '<base href="%s">' % prefix, index_html,
+        return re.sub(
+            r"\<base href=\".*\".*\>",
+            '<base href="%s">' % prefix,
+            index_html,
         )
-
-        return index_prefixed
 
 
 def load_yaml(f):
@@ -45,12 +45,7 @@ def load_yaml(f):
 
     try:
         contents = yaml.safe_load(c)
-        if contents is None:
-            # YAML exists but is empty
-            return {}
-        else:
-            # YAML exists and is not empty
-            return contents
+        return {} if contents is None else contents
     except yaml.YAMLError:
         return None
 
@@ -74,12 +69,7 @@ def load_param_yaml(f, **kwargs):
 
     try:
         contents = yaml.safe_load(c)
-        if contents is None:
-            # YAML exists but is empty
-            return {}
-        else:
-            # YAML exists and is not empty
-            return contents
+        return {} if contents is None else contents
     except yaml.YAMLError:
         return None
 
@@ -98,27 +88,17 @@ def get_uptime(then):
     diff = now - then.replace(tzinfo=None)
 
     days = diff.days
-    hours = int(diff.seconds / 3600)
-    mins = int((diff.seconds % 3600) / 60)
-
     age = ""
     if days > 0:
-        if days == 1:
-            age = str(days) + " day"
-        else:
-            age = str(days) + " days"
+        age = f"{str(days)} day" if days == 1 else f"{str(days)} days"
     else:
+        hours = int(diff.seconds / 3600)
         if hours > 0:
-            if hours == 1:
-                age = str(hours) + " hour"
-            else:
-                age = str(hours) + " hours"
+            age = f"{hours} hour" if hours == 1 else f"{hours} hours"
         else:
+            mins = int((diff.seconds % 3600) / 60)
+
             if mins == 0:
                 return "just now"
-            if mins == 1:
-                age = str(mins) + " min"
-            else:
-                age = str(mins) + " mins"
-
-    return age + " ago"
+            age = f"{mins} min" if mins == 1 else f"{mins} mins"
+    return f"{age} ago"

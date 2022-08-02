@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building TWA image using Kaniko
         dockerfile = ("%s/components/crud-web-apps"
                       "/tensorboards/Dockerfile") % self.src_dir
-        context = "dir://%s/components/crud-web-apps" % self.src_dir
+        context = f"dir://{self.src_dir}/components/crud-web-apps"
         destination = "twa-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

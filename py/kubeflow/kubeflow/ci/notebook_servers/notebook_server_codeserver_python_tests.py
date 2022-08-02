@@ -17,7 +17,8 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building notebook-server-codeserver-python image using Kaniko
         dockerfile = ("%s/components/example-notebook-servers"
                       "/codeserver-python/Dockerfile") % self.src_dir
-        context = "dir://%s/components/example-notebook-servers/codeserver-python/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/example-notebook-servers/codeserver-python/"
+
         destination = "notebook-server-codeserver-python-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

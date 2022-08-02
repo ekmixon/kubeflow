@@ -84,8 +84,14 @@ def wait_for_vm(project,
   while True:
     try:
       util.run([
-          "gcloud", "compute", "--project=" + project, "ssh", "--zone=" + zone,
-          vm, "--", "echo hello world"
+          "gcloud",
+          "compute",
+          f"--project={project}",
+          "ssh",
+          f"--zone={zone}",
+          vm,
+          "--",
+          "echo hello world",
       ])
       logging.info("VM is ready")
       return
@@ -103,8 +109,14 @@ def wait_for_vm(project,
 def execute(project, zone, vm, commands):
   """Execute the supplied commands on the VM."""
   util.run([
-      "gcloud", "compute", "--project=" + project, "ssh", "--zone=" + zone, vm,
-      "--", " && ".join(commands)
+      "gcloud",
+      "compute",
+      f"--project={project}",
+      "ssh",
+      f"--zone={zone}",
+      vm,
+      "--",
+      " && ".join(commands),
   ])
 
 
@@ -112,17 +124,27 @@ def execute_script(project, zone, vm, script):
   """Execute the specified script on the VM."""
 
   target_path = os.path.join(
-      "/tmp",
-      os.path.basename(script) + "." + uuid.uuid4().hex[0:4])
+      "/tmp", f"{os.path.basename(script)}." + uuid.uuid4().hex[:4])
 
   target = "{0}:{1}".format(vm, target_path)
   logging.info("Copying %s to %s", script, target)
   util.run([
-      "gcloud", "compute", "--project=" + project, "scp", script, target,
-      "--zone=" + zone
+      "gcloud",
+      "compute",
+      f"--project={project}",
+      "scp",
+      script,
+      target,
+      f"--zone={zone}",
   ])
 
   util.run([
-      "gcloud", "compute", "--project=" + project, "ssh", "--zone=" + zone, vm,
-      "--", "chmod a+rx " + target_path + " && " + target_path
+      "gcloud",
+      "compute",
+      f"--project={project}",
+      "ssh",
+      f"--zone={zone}",
+      vm,
+      "--",
+      f"chmod a+rx {target_path} && {target_path}",
   ])

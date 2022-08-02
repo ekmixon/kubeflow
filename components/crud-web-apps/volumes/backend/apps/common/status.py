@@ -36,9 +36,7 @@ def pvc_status(pvc):
         )
     elif evs[0].reason == "Provisioning":
         phase = status.STATUS_PHASE.WAITING
-    elif evs[0].reason == "FailedBinding":
-        phase = status.STATUS_PHASE.WARNING
-    elif evs[0].type == "Warning":
+    elif evs[0].reason == "FailedBinding" or evs[0].type == "Warning":
         phase = status.STATUS_PHASE.WARNING
     elif evs[0].type == "Normal":
         phase = status.STATUS_PHASE.READY
@@ -59,7 +57,4 @@ def viewer_status(viewer):
     if "deletionTimestamp" in viewer["metadata"]:
         return status.STATUS_PHASE.TERMINATING
 
-    if not ready:
-        return status.STATUS_PHASE.WAITING
-
-    return status.STATUS_PHASE.READY
+    return status.STATUS_PHASE.READY if ready else status.STATUS_PHASE.WAITING

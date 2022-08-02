@@ -15,11 +15,11 @@ def get_config(mode):
         config.BackendMode.PRODUCTION.value: config.ProdConfig,
         config.BackendMode.PRODUCTION_FULL.value: config.ProdConfig,
     }
-    cfg_class = config_classes.get(mode)
-    if not cfg_class:
+    if cfg_class := config_classes.get(mode):
+        return cfg_class()
+    else:
         raise RuntimeError("Backend mode '%s' is not implemented. Choose one"
                            " of %s" % (mode, list(config_classes.keys())))
-    return cfg_class()
 
 
 APP_NAME = os.environ.get("APP_NAME", "Volumes Web App")

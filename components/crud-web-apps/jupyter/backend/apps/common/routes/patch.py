@@ -27,11 +27,11 @@ def patch_notebook(namespace, notebook):
         raise exceptions.BadRequest("Request doesn't have a body.")
 
     # Ensure request has at least one valid command
-    if not any(attr in ATTRIBUTES for attr in request_body.keys()):
+    if all(attr not in ATTRIBUTES for attr in request_body.keys()):
         raise exceptions.BadRequest(
-            "Request body must include at least one supported key: %s"
-            % list(ATTRIBUTES)
+            f"Request body must include at least one supported key: {list(ATTRIBUTES)}"
         )
+
 
     # start/stop a notebook
     if STOP_ATTR in request_body:
@@ -42,14 +42,13 @@ def patch_notebook(namespace, notebook):
 
 # helper functions
 def start_stop_notebook(namespace, notebook, request_body):
-    stop = request_body[STOP_ATTR]
-
     patch_body = {}
-    if stop:
+    if stop := request_body[STOP_ATTR]:
         if notebook_is_stopped(namespace, notebook):
             raise exceptions.Conflict(
-                "Notebook %s/%s is already stopped." % (namespace, notebook)
+                f"Notebook {namespace}/{notebook} is already stopped."
             )
+
 
         log.info("Stopping Notebook Server '%s/%s'", namespace, notebook)
         now = dt.datetime.now(dt.timezone.utc)

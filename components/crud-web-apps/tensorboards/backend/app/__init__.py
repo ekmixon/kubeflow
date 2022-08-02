@@ -18,7 +18,7 @@ def create_app(name=__name__, cfg: config.Config = None):
 
     app = base.create_app(name, static_dir, cfg)
 
-    log.info("Setting STATIC_DIR to: " + static_dir)
+    log.info(f"Setting STATIC_DIR to: {static_dir}")
     app.config["STATIC_DIR"] = static_dir
 
     # Register the app's blueprints

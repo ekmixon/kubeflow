@@ -122,16 +122,15 @@ def main():
         args.url,
         verify=False,
         data=data,
-        headers={'Authorization': 'Bearer {}'.format(token)})
+        headers={'Authorization': f'Bearer {token}'},
+    )
   else:
     resp = requests.get(
-        args.url,
-        verify=False,
-        headers={'Authorization': 'Bearer {}'.format(token)})
+        args.url, verify=False, headers={'Authorization': f'Bearer {token}'})
   if resp.status_code == 403:
     raise Exception(
-        'Service account {} does not have permission to '
-        'access the IAP-protected application.'.format(signer_email))
+        f'Service account {signer_email} does not have permission to access the IAP-protected application.'
+    )
   elif resp.status_code != 200:
     raise Exception('Bad response from application: {!r} / {!r} / {!r}'.format(
         resp.status_code, resp.headers, resp.text))

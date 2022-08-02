@@ -35,6 +35,7 @@ References:
 -  OWASP CSRF Mitigation: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
 """
 
+
 import logging
 import os
 import secrets
@@ -50,7 +51,7 @@ log = logging.getLogger(__name__)
 # NOTE: We can't make these configurable until we have a way to pass settings
 # to the frontend in Kubeflow Web Apps (e.g., a `/settings` endpoint).
 CSRF_COOKIE = "XSRF-TOKEN"
-CSRF_HEADER = "X-" + CSRF_COOKIE
+CSRF_HEADER = f"X-{CSRF_COOKIE}"
 SAMESITE_VALUES = ["Strict", "Lax", "None"]
 
 
@@ -95,12 +96,10 @@ def check_endpoint():
 
     log.debug("Ensuring endpoint is CSRF protected: %s", request.path)
     if CSRF_COOKIE not in request.cookies:
-        raise Forbidden("Could not find CSRF cookie %s in the request."
-                        % CSRF_COOKIE)
+        raise Forbidden(f"Could not find CSRF cookie {CSRF_COOKIE} in the request.")
 
     if CSRF_HEADER not in request.headers:
-        raise Forbidden("Could not detect CSRF protection header %s."
-                        % CSRF_HEADER)
+        raise Forbidden(f"Could not detect CSRF protection header {CSRF_HEADER}.")
 
     header_token = request.headers[CSRF_HEADER]
     cookie_token = request.cookies[CSRF_COOKIE]

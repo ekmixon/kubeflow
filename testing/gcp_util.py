@@ -71,12 +71,10 @@ def get_google_open_id_connect_token(service_account_credentials):
   return token_response["id_token"]
 
 def may_get_env_var(name):
-  env_val = os.getenv(name)
-  if env_val:
-    logging.info("%s is set" % name)
-    return env_val
-  else:
-    raise Exception("%s not set" % name)
+  if not (env_val := os.getenv(name)):
+    raise Exception(f"{name} not set")
+  logging.info(f"{name} is set")
+  return env_val
 
 def iap_is_ready(url, wait_min=15):
   """
@@ -104,34 +102,32 @@ def iap_is_ready(url, wait_min=15):
       resp = requests.request(
           "GET",
           url,
-          headers={
-              "Authorization":
-              "Bearer {}".format(google_open_id_connect_token)
-          },
-          verify=False)
+          headers={"Authorization": f"Bearer {google_open_id_connect_token}"},
+          verify=False,
+      )
       logging.info(resp.text)
       if resp.status_code == 200:
         logging.info("Endpoint is ready for %s!", url)
         return True
       else:
-        logging.info(
-            "%s: Endpoint not ready, request number: %s" % (url, num_req))
+        logging.info(f"{url}: Endpoint not ready, request number: {num_req}")
     except Exception as e:
-      logging.info("%s: Endpoint not ready, exception caught %s, request number: %s" %
-                   (url, str(e), num_req))
+      logging.info(
+          f"{url}: Endpoint not ready, exception caught {str(e)}, request number: {num_req}"
+      )
     sleep(10)
   return False
 
 def basic_auth_is_ready(url, username, password, wait_min=15):
-  get_url = url + "/kflogin"
-  post_url = url + "/apikflogin"
+  get_url = f"{url}/kflogin"
+  post_url = f"{url}/apikflogin"
 
   req_num = 0
   end_time = datetime.datetime.now() + datetime.timedelta(
       minutes=wait_min)
   while datetime.datetime.now() < end_time:
     req_num += 1
-    logging.info("Trying url: %s request number %s" % (get_url, req_num))
+    logging.info(f"Trying url: {get_url} request number {req_num}")
     resp = None
     try:
       resp = requests.request(
@@ -139,17 +135,22 @@ def basic_auth_is_ready(url, username, password, wait_min=15):
           get_url,
           verify=False)
     except SSLError as e:
-      logging.warning("%s: Endpoint SSL handshake error: %s; request number: %s" % (url, e, req_num))
+      logging.warning(
+          f"{url}: Endpoint SSL handshake error: {e}; request number: {req_num}"
+      )
     except ReqConnectionError:
-      logging.info(
-          "%s: Endpoint not ready, request number: %s" % (url, req_num))
+      logging.info(f"{url}: Endpoint not ready, request number: {req_num}")
     if not resp or resp.status_code != 200:
-      logging.info("Basic auth login is not ready, request number %s: %s" % (req_num, get_url))
+      logging.info(
+          f"Basic auth login is not ready, request number {req_num}: {get_url}"
+      )
     else:
       break
     sleep(10)
 
-  logging.info("%s: endpoint is ready, testing login API; request number %s" % (get_url, req_num))
+  logging.info(
+      f"{get_url}: endpoint is ready, testing login API; request number {req_num}"
+  )
   resp = requests.post(
       post_url,
       auth=(username, password),
@@ -157,18 +158,14 @@ def basic_auth_is_ready(url, username, password, wait_min=15):
           "x-from-login": "true",
       },
       verify=False)
-  logging.info("%s: %s" % (post_url, resp.text))
+  logging.info(f"{post_url}: {resp.text}")
   if resp.status_code != 205:
     logging.error("%s: login is failed", post_url)
     return False
 
-  cookie = None
-  for c in resp.cookies:
-    if c.name == COOKIE_NAME:
-      cookie = c
-      break
+  cookie = next((c for c in resp.cookies if c.name == COOKIE_NAME), None)
   if cookie is None:
-    logging.error("%s: auth cookie cannot be found; name: %s" % (post_url, COOKIE_NAME))
+    logging.error(f"{post_url}: auth cookie cannot be found; name: {COOKIE_NAME}")
     return False
 
   resp = requests.get(
@@ -177,6 +174,6 @@ def basic_auth_is_ready(url, username, password, wait_min=15):
           cookie.name: cookie.value,
       },
       verify=False)
-  logging.info("%s: %s" % (url, resp.status_code))
+  logging.info(f"{url}: {resp.status_code}")
   logging.info(resp.content)
   return resp.status_code == 200

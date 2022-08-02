@@ -17,8 +17,7 @@ def delete_pvc(pvc, namespace):
     are using that PVC then delete the Viewer Pods as well as the PVC.
     """
     pods = common_utils.get_pods_using_pvc(pvc, namespace)
-    non_viewer_pods = [p for p in pods if not rok_utils.is_viewer_pod(p)]
-    if non_viewer_pods:
+    if non_viewer_pods := [p for p in pods if not rok_utils.is_viewer_pod(p)]:
         pod_names = [p.metadata.name for p in non_viewer_pods]
         raise exceptions.Conflict("Cannot delete PVC '%s' because it is being"
                                   " used by pods: %s" % (pvc, pod_names))
@@ -27,5 +26,4 @@ def delete_pvc(pvc, namespace):
     api.delete_pvc(pvc, namespace)
     log.info("Successfully deleted PVC %s/%s", namespace, pvc)
 
-    return api.success_response("message",
-                                "PVC %s successfully deleted." % pvc)
+    return api.success_response("message", f"PVC {pvc} successfully deleted.")

@@ -181,7 +181,7 @@ def change_image_tag(img, newTag):
     parts = img.split(":")
     if len(parts) != 2:
         raise RuntimeError("Image `%s` doesn't have expected format <img>:<tag>")
-    return parts[0] + ":" + newTag
+    return f"{parts[0]}:{newTag}"
 
 
 def parse_args():

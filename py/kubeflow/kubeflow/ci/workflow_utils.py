@@ -50,17 +50,17 @@ class ArgoTestBuilder:
         self.mount_path = "/mnt/" + "test-data-volume"
         # test_dir is the root directory for all data for a particular test
         # run.
-        self.test_dir = self.mount_path + "/" + self.name
+        self.test_dir = f"{self.mount_path}/{self.name}"
         # output_dir is the directory to sync to GCS to contain the output for
         # this job.
-        self.output_dir = self.test_dir + "/output"
+        self.output_dir = f"{self.test_dir}/output"
 
-        self.artifacts_dir = "%s/artifacts/junit_%s" % (self.output_dir, name)
+        self.artifacts_dir = f"{self.output_dir}/artifacts/junit_{name}"
 
         # source directory where all repos should be checked out
-        self.src_root_dir = "%s/src" % self.test_dir
+        self.src_root_dir = f"{self.test_dir}/src"
         # The directory containing the kubeflow/kubeflow repo
-        self.src_dir = "%s/kubeflow/kubeflow" % self.src_root_dir
+        self.src_dir = f"{self.src_root_dir}/kubeflow/kubeflow"
 
         # Root of testing repo.
         self.testing_src_dir = os.path.join(self.src_root_dir,
@@ -71,7 +71,7 @@ class ArgoTestBuilder:
 
         # The directory within the kubeflow_testing submodule containing
         # py scripts to use.
-        self.kubeflow_testing_py = "%s/kubeflow/testing/py" % self.src_root_dir
+        self.kubeflow_testing_py = f"{self.src_root_dir}/kubeflow/testing/py"
 
         self.go_path = self.test_dir
 
@@ -84,9 +84,7 @@ class ArgoTestBuilder:
             },
         }]
         if LOCAL_TESTING == "False":
-            volumes.append(AWS_CREDENTIALS_VOLUME)
-            volumes.append(DOCKER_CONFIG_VOLUME)
-
+            volumes.extend((AWS_CREDENTIALS_VOLUME, DOCKER_CONFIG_VOLUME))
         workflow = {
             "apiVersion": "argoproj.io/v1alpha1",
             "kind": "Workflow",
@@ -135,18 +133,10 @@ class ArgoTestBuilder:
             "name": DATA_VOLUME
         }]
         if LOCAL_TESTING == "False":
-            volume_mounts.append(AWS_CREDENTIALS_MOUNT)
-            volume_mounts.append(DOCKER_CONFIG_MOUNT)
-
+            volume_mounts.extend((AWS_CREDENTIALS_MOUNT, DOCKER_CONFIG_MOUNT))
         image = AWS_WORKER_IMAGE
-        mem_lim = "4Gi"
-        if mem_override:
-            mem_lim = mem_override
-
-        active_deadline_sec = 3000
-        if deadline_override:
-            active_deadline_sec = deadline_override
-
+        mem_lim = mem_override or "4Gi"
+        active_deadline_sec = deadline_override or 3000
         task_template = {
             "activeDeadlineSeconds": active_deadline_sec,
             "container": {
@@ -259,20 +249,23 @@ class ArgoTestBuilder:
                 with open(os.path.join("/src/kubeflow/kubeflow",
                                        "releasing/version/VERSION")) as f:
                     version = f.read().strip()
-                destination += ":%s" % version
+                destination += f":{version}"
             else:
                 sha = os.getenv("PULL_BASE_SHA", "12341234kanikotest")
                 base = os.getenv("PULL_BASE_REF", "master")
-                destination += ":%s-%s" % (base, sha[0:8])
+                destination += f":{base}-{sha[:8]}"
 
         # add short UUID to step name to ensure it is unique
         random_suffix = ''.join(random.choices(alphabet, k=8))
-        kaniko["name"] = "kaniko-build-push-" + random_suffix
+        kaniko["name"] = f"kaniko-build-push-{random_suffix}"
         kaniko["container"]["image"] = "gcr.io/kaniko-project/executor:v1.5.0"
         kaniko["container"]["command"] = ["/kaniko/executor"]
-        kaniko["container"]["args"] = ["--dockerfile=%s" % dockerfile,
-                                       "--context=%s" % context,
-                                       "--destination=%s" % destination]
+        kaniko["container"]["args"] = [
+            f"--dockerfile={dockerfile}",
+            f"--context={context}",
+            f"--destination={destination}",
+        ]
+
 
         # don't push the image to a registry if trying out the produced
         # Argo Workflow yaml locally
@@ -296,8 +289,9 @@ class ArgoTestBuilder:
         checkout["container"]["command"] = [
             "/usr/local/bin/checkout_repos.sh",
             "--repos=" + ",".join(repos),
-            "--src_dir=" + self.src_root_dir,
+            f"--src_dir={self.src_root_dir}",
         ]
+
 
         return checkout
 
@@ -337,6 +331,6 @@ class ArgoTestBuilder:
         """Build the Argo Worfklow for this test"""
         raise NotImplementedError("Subclasses should implement this!")
 
-    def create_workflow(name=None, namespace=None, bucket=None, **kwargs):
+    def create_workflow(self, namespace=None, bucket=None, **kwargs):
         """Return the final dict with the Argo Workflow to be submitted"""
         raise NotImplementedError("Subclasses should implement this!")

@@ -391,7 +391,7 @@ class TestJWA:
 
         # Test if an error appeared as a snackbar
         snack_type, snack_log = jwa.wait_for_snack_bar()
-        if snack_type == STATE_ERROR or snack_type == STATE_WARNING:
+        if snack_type in [STATE_ERROR, STATE_WARNING]:
             logging.error(f"An error occured on index page: '{snack_log}'")
             assert False
 
@@ -416,7 +416,7 @@ class TestJWA:
 
         # Test if an error appeared as a snackbar
         snack_type, snack_log = jwa.wait_for_snack_bar(5)
-        if snack_type == STATE_ERROR or snack_type == STATE_WARNING:
+        if snack_type in [STATE_ERROR, STATE_WARNING]:
             logging.error(f"An error occured on form page: '{snack_log}'")
             assert False
 

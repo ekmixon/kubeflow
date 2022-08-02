@@ -62,6 +62,5 @@ def check_authentication():
         # Return an unauthenticated response and don't call the route's
         # assigned function.
         raise Unauthorized("No user detected.")
-    else:
-        log.info("Handling request for user: %s", user)
-        return
+    log.info("Handling request for user: %s", user)
+    return

@@ -31,7 +31,7 @@ def get_endpoints_list(project):
     for s in results.get("services", {}):
       name = s.get("serviceName", "")
       endpoints.append(name)
-    if not "nextPageToken" in results:
+    if "nextPageToken" not in results:
       break
     next_page_token = results["nextPageToken"]
 
@@ -76,9 +76,9 @@ def test_kfctl_delete(record_xml_attribute, kfctl_path, app_path, project,
   endpoint_name = "{deployment}.endpoints.{project}.cloud.goog".format(
       deployment=name,
       project=project)
-  logging.info("Verify endpoint service is deleted: " + endpoint_name)
+  logging.info(f"Verify endpoint service is deleted: {endpoint_name}")
   if endpoint_name in get_endpoints_list(project):
-    msg = "Endpoint is not deleted: " + endpoint_name
+    msg = f"Endpoint is not deleted: {endpoint_name}"
     logging.error(msg)
     raise AssertionError(msg)
   else:

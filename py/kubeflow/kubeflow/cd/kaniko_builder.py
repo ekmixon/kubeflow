@@ -17,8 +17,8 @@ class Builder(ci.workflow_utils.ArgoTestBuilder):
         task_template = self.build_task_template(mem_override, deadline_override)
 
         # Build component OCI image using Kaniko
-        dockerfile = ("%s/%s") % (self.src_dir, dockerfile)
-        context = "dir://%s/%s" % (self.src_dir, context)
+        dockerfile = f"{self.src_dir}/{dockerfile}"
+        context = f"dir://{self.src_dir}/{context}"
         destination = destination
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,
@@ -28,7 +28,7 @@ class Builder(ci.workflow_utils.ArgoTestBuilder):
                                         kaniko_task, [self.mkdir_task_name])
 
         if second_dockerfile and second_destination:
-            dockerfile = ("%s/%s") % (self.src_dir, second_dockerfile)
+            dockerfile = f"{self.src_dir}/{second_dockerfile}"
             destination = second_destination
 
             second_kaniko_task = self.create_kaniko_task(task_template, dockerfile,

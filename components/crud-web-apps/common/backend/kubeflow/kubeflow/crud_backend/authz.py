@@ -75,9 +75,8 @@ def is_authorized(user, verb, group, version, resource, namespace=None,
 
     if obj.status is not None:
         return obj.status.allowed
-    else:
-        log.error("SubjectAccessReview doesn't have status.")
-        return False
+    log.error("SubjectAccessReview doesn't have status.")
+    return False
 
 
 def generate_unauthorized_message(user, verb, group, version, resource,
@@ -85,12 +84,12 @@ def generate_unauthorized_message(user, verb, group, version, resource,
     msg = "User '%s' is not authorized to %s" % (user, verb)
 
     if group == "":
-        msg += " %s/%s" % (version, resource)
+        msg += f" {version}/{resource}"
     else:
-        msg += " %s/%s/%s" % (group, version, resource)
+        msg += f" {group}/{version}/{resource}"
 
     if subresource is not None:
-        msg += "/%s" % subresource
+        msg += f"/{subresource}"
 
     if namespace is not None:
         msg += " in namespace '%s'" % namespace

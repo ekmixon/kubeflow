@@ -76,8 +76,11 @@ def parse_args():
 def create_app_and_job(args, namespace, name):
   try:
     util.run([
-        "ks", "init", "katib-app", "--skip-default-registries",
-        "--namespace=" + namespace
+        "ks",
+        "init",
+        "katib-app",
+        "--skip-default-registries",
+        f"--namespace={namespace}",
     ])
   except subprocess.CalledProcessError as e:
     # Keep going if the app already exists. This is a sign the a previous
@@ -87,7 +90,7 @@ def create_app_and_job(args, namespace, name):
 
   os.chdir("katib-app")
   try:
-    util.run(["ks", "registry", "add", "kubeflow", args.src_dir + "/kubeflow"])
+    util.run(["ks", "registry", "add", "kubeflow", f"{args.src_dir}/kubeflow"])
   except subprocess.CalledProcessError as e:
     # Keep going if the registry has already been added.
     # This is a sign the a previous attempt failed and we are retrying.
@@ -106,7 +109,7 @@ def create_app_and_job(args, namespace, name):
     prototype_name = "katib-studyjob-test-v1alpha1"
   else:
     raise ValueError(
-        "Unrecognized value for studyjob_version: %s" % args.studyjob_version)
+        f"Unrecognized value for studyjob_version: {args.studyjob_version}")
 
   util.run(["ks", "generate", prototype_name, name])
   util.run(["ks", "apply", "default", "-c", "katib-studyjob-test"])

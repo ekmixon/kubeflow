@@ -14,7 +14,7 @@ def random_string(size=9, chars=string.ascii_lowercase + string.digits):
 
 def rok_pvc_from_dict(vol, namespace):
     pvc = utils.pvc_from_dict(vol, namespace)
-    pvc.metadata.name = "%s-%s" % (vol["name"], random_string())
+    pvc.metadata.name = f'{vol["name"]}-{random_string()}'
     return pvc
 
 

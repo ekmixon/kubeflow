@@ -49,14 +49,13 @@ def parse_args():
 def wait_for_resource(resource, end_time):
   while True:
     if datetime.datetime.now() > end_time:
-      raise RuntimeError("Timed out waiting for " + resource)
+      raise RuntimeError(f"Timed out waiting for {resource}")
     try:
       if 'error' not in util.run(["kubectl", "get", resource]).lower():
-        logging.info("Found " + resource)
+        logging.info(f"Found {resource}")
         break
     except subprocess.CalledProcessError as e:
-      logging.info(
-          "Could not find {}. Sleeping for 10 seconds..".format(resource))
+      logging.info(f"Could not find {resource}. Sleeping for 10 seconds..")
       time.sleep(10)
 
 

@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building Tensorboard Controller image using Kaniko
         dockerfile = ("%s/components/tensorboard-controller"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/"
         destination = "tensorboard-controller-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

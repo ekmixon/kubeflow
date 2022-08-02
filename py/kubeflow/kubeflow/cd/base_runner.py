@@ -3,8 +3,8 @@ import yaml
 from importlib import import_module
 
 def main(component_name, workflow_name):
-    component = import_module("kubeflow.kubeflow.cd.%s" % component_name)
-    
+    component = import_module(f"kubeflow.kubeflow.cd.{component_name}")
+
     WORKFLOW_NAME = os.getenv("WORKFLOW_NAME", workflow_name)
     WORKFLOW_NAMESPACE = os.getenv("WORKFLOW_NAMESPACE", "kubeflow-user")
     print(yaml.dump(component.create_workflow(WORKFLOW_NAME, WORKFLOW_NAMESPACE)))

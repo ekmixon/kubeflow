@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building Central Dashboards image using Kaniko
         dockerfile = ("%s/components/centraldashboard"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/centraldashboard/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/centraldashboard/"
         destination = "central-dashboard-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

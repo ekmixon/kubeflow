@@ -48,24 +48,24 @@ parser.add_argument(
 
 
 def write_notebook_config(config, name, num):
-  config['metadata']['name'] = 'jupyter-test-' + str(num)
-  config['spec']['template']['spec']['containers'][0]['name'
-                                                     ] = 'notebook-' + str(num)
+  config['metadata']['name'] = f'jupyter-test-{str(num)}'
+  config['spec']['template']['spec']['containers'][0][
+      'name'] = f'notebook-{str(num)}'
   config['spec']['template']['spec']['volumes'][0]['persistentVolumeClaim'][
-      'claimName'] = 'test-vol-' + str(num)
+      'claimName'] = f'test-vol-{str(num)}'
   with open(name, 'w') as f:
     print(yaml.dump(config), file=f)
 
 
 def write_pvc_config(config, name, num):
-  config['metadata']['name'] = 'test-vol-' + str(num)
+  config['metadata']['name'] = f'test-vol-{str(num)}'
   with open(name, 'w') as f:
     print(yaml.dump(config), file=f)
 
 
 def main():
   args = parser.parse_args()
-  assert args.operation == 'apply' or args.operation == 'delete'
+  assert args.operation in ['apply', 'delete']
   notebook_config = None
   pvc_config = None
   with open('jupyter_test.yaml', 'r') as f:

@@ -26,12 +26,11 @@ def set_kustomize_image(kustomize_file, image_name, image):
   with open(kustomize_file) as hf:
     config = yaml.load(hf)
 
-  old_image = ""
-  for i in config.get("images"):
-    if i["name"] == image_name:
-      old_image = i.get("newName", image_name) + ":" + i.get("newTag", "")
-      break
-
+  old_image = next(
+      (i.get("newName", image_name) + ":" + i.get("newTag", "")
+       for i in config.get("images") if i["name"] == image_name),
+      "",
+  )
   if old_image == image:
     logging.info("Not updating %s; image is already %s", kustomize_file,
                      image)

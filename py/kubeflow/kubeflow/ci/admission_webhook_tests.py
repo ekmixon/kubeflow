@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building Admission Webhook image using Kaniko
         dockerfile = ("%s/components/admission-webhook"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/admission-webhook/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/admission-webhook/"
         destination = "admission-webhook-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

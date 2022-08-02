@@ -96,10 +96,7 @@ def verifyProfileDeletion(api_client, group, version, name):
 def verifyRolebindings(api_client, name):
   rbacV1 = k8s_client.RbacAuthorizationV1Api(api_client)
   rolebindingsList = rbacV1.list_namespaced_role_binding(namespace=name, watch=False)
-  rb_dict = {}
-  for i in rolebindingsList.items:
-    rb_dict[i.role_ref.name] = i.metadata.name
-
+  rb_dict = {i.role_ref.name: i.metadata.name for i in rolebindingsList.items}
   if {'kubeflow-admin', 'kubeflow-edit', 'kubeflow-view'} <= rb_dict.keys():
     logging.info("all default rolebindings are present\n")
   else:

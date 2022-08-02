@@ -64,7 +64,7 @@ def process_gpus(container):
     count = 0
     gpus = []
     resource_limits = container.get("resources", {}).get("limits", {})
-    for vendor in gpu_vendors.keys():
+    for vendor, value in gpu_vendors.items():
         if vendor not in resource_limits:
             continue
 
@@ -72,7 +72,7 @@ def process_gpus(container):
         count += int(gpu_count)
 
         # final message will be like: 1 NVIDIA, 2 AMD
-        gpus.append("%s %s" % (gpu_count, gpu_vendors[vendor]))
+        gpus.append(f"{gpu_count} {value}")
 
     return {"count": count, "message": ", ".join(gpus)}
 
@@ -99,10 +99,7 @@ def get_storage_class(vol):
         return None
     if vol["class"] == "{empty}":
         return ""
-    if vol["class"] == "{none}":
-        return None
-    else:
-        return vol["class"]
+    return None if vol["class"] == "{none}" else vol["class"]
 
 
 # Functions for transforming the data from k8s api

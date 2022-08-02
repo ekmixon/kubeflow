@@ -20,8 +20,9 @@ def login_to_kubeflow_iap(driver, kubeflow_url):
     )
 
     driver.header_overrides = {
-        "Authorization": "Bearer {}".format(google_open_id_connect_token)
+        "Authorization": f"Bearer {google_open_id_connect_token}"
     }
+
 
     driver.get(kubeflow_url)
 

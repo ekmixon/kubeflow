@@ -13,10 +13,7 @@ def handle_storage_class(vol):
         return None
     if vol["class"] == "{none}":
         return ""
-    if vol["class"] == "{empty}":
-        return None
-    else:
-        return vol["class"]
+    return None if vol["class"] == "{empty}" else vol["class"]
 
 
 def pvc_from_dict(body, namespace):

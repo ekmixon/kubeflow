@@ -20,8 +20,10 @@ def create_app(name, static_folder, config):
     app = Flask(name, static_folder=static_folder)
     app.config.from_object(config)
 
-    if (config.ENV == BackendMode.DEVELOPMENT.value
-            or config.ENV == BackendMode.DEVELOPMENT_FULL.value):
+    if config.ENV in [
+        BackendMode.DEVELOPMENT.value,
+        BackendMode.DEVELOPMENT_FULL.value,
+    ]:
         log.warn("RUNNING IN DEVELOPMENT MODE")
 
     # Register all the blueprints

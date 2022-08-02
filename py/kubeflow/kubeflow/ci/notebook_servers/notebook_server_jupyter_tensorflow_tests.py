@@ -17,7 +17,8 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building notebook-server-jupyter-tensorflow images using Kaniko
         dockerfile = ("%s/components/example-notebook-servers"
                       "/jupyter-tensorflow/cpu.Dockerfile") % self.src_dir
-        context = "dir://%s/components/example-notebook-servers/jupyter-tensorflow/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/example-notebook-servers/jupyter-tensorflow/"
+
         destination = "notebook-server-jupyter-tensorflow-cpu-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

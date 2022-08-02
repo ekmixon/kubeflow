@@ -47,15 +47,12 @@ def should_test(file_path):
     return False
   parts = file_path.split('/')
   if len(parts) < 2:
-    raise ValueError('Invalid file : {}'.format(file_path))
+    raise ValueError(f'Invalid file : {file_path}')
   return parts[-2] != 'prototypes'
 
 
 def is_excluded(file_name, exclude_dirs):
-  for exclude_dir in exclude_dirs:
-    if file_name.startswith(exclude_dir):
-      return True
-  return False
+  return any(file_name.startswith(exclude_dir) for exclude_dir in exclude_dirs)
 
 
 def run(test_files_dirs, jsonnet_path_args, exclude_dirs, test_case):
@@ -97,12 +94,12 @@ def run(test_files_dirs, jsonnet_path_args, exclude_dirs, test_case):
               test_passed = parsed.get("pass", False)
 
             if not test_passed:
-              test_case.add_failure_info('{} test failed'.format(test_file))
+              test_case.add_failure_info(f'{test_file} test failed')
               logging.error(
                   '%s test failed. See Subprocess output for details.',
                   test_file)
           except Exception as e:
-            test_case.add_failure_info('{} test failed'.format(test_file))
+            test_case.add_failure_info(f'{test_file} test failed')
             logging.error(
                 '%s test failed with exception %s. '
                 'See Subprocess output for details.', e, test_file)
@@ -133,7 +130,7 @@ def parse_args():
   return args
 
 
-def test_jsonnet(test_case):  # pylint: disable=redefined-outer-name
+def test_jsonnet(test_case):# pylint: disable=redefined-outer-name
   args = parse_args()
 
   if not args.test_files_dirs:
@@ -144,13 +141,8 @@ def test_jsonnet(test_case):  # pylint: disable=redefined-outer-name
   jsonnet_path_args = []
   if len(args.jsonnet_path_dirs) > 0:
     for jsonnet_path_dir in args.jsonnet_path_dirs.split(','):
-      jsonnet_path_args.append('--jpath')
-      jsonnet_path_args.append(jsonnet_path_dir)
-
-  exclude_dirs = []
-  if args.exclude_dirs:
-    exclude_dirs = args.exclude_dirs.split(',')
-
+      jsonnet_path_args.extend(('--jpath', jsonnet_path_dir))
+  exclude_dirs = args.exclude_dirs.split(',') if args.exclude_dirs else []
   run(test_files_dirs, jsonnet_path_args, exclude_dirs, test_case)
 
 

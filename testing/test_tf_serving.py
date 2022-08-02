@@ -42,15 +42,9 @@ def almost_equal(a, b, tol=0.001):
   Compares two json objects (assuming same structure) with tolerance on numbers
   """
   if isinstance(a, dict):
-    for key in a.keys():
-      if not almost_equal(a[key], b[key]):
-        return False
-    return True
+    return all(almost_equal(a[key], b[key]) for key in a.keys())
   elif isinstance(a, list):
-    for i in xrange(len(a)):
-      if not almost_equal(a[i], b[i]):
-        return False
-    return True
+    return all(almost_equal(a[i], b[i]) for i in xrange(len(a)))
   elif isinstance(a, numbers.Number):
     return abs(a - b) < tol
   else:
@@ -91,7 +85,7 @@ def main():
 
   t = test_util.TestCase()
   t.class_name = "Kubeflow"
-  t.name = args.workflow_name + "-" + args.service_name
+  t.name = f"{args.workflow_name}-{args.service_name}"
 
   start = time.time()
 
@@ -105,12 +99,9 @@ def main():
     service = core_api.read_namespaced_service(args.service_name,
                                                args.namespace)
     service_ip = service.spec.cluster_ip
-    model_urls = [
-        "http://" + service_ip +
-        ":8500/v1/models/mnist:predict",  # tf serving's http server
-    ]
+    model_urls = [(f"http://{service_ip}" + ":8500/v1/models/mnist:predict")]
     for model_url in model_urls:
-      logging.info("Try predicting with endpoint {}".format(model_url))
+      logging.info(f"Try predicting with endpoint {model_url}")
       num_try = 1
       result = None
       while True:
@@ -121,24 +112,25 @@ def main():
           num_try += 1
           if num_try > 10:
             raise
-          logging.info('prediction failed: {}. Retrying...'.format(e))
+          logging.info(f'prediction failed: {e}. Retrying...')
           time.sleep(5)
         else:
           break
-      logging.info('Got result: {}'.format(result.text))
+      logging.info(f'Got result: {result.text}')
       if args.result_path:
         with open(args.result_path) as f:
           expected_result = json.loads(f.read())
-          logging.info('Expected result: {}'.format(expected_result))
+          logging.info(f'Expected result: {expected_result}')
           assert (almost_equal(expected_result, json.loads(result.text)))
   except Exception as e:
-    t.failure = "Test failed; " + e.message
+    t.failure = f"Test failed; {e.message}"
     raise
   finally:
     t.time = time.time() - start
     junit_path = os.path.join(
         args.artifacts_dir,
-        "junit_kubeflow-tf-serving-image-{}.xml".format(args.service_name))
+        f"junit_kubeflow-tf-serving-image-{args.service_name}.xml",
+    )
     logging.info("Writing test results to %s", junit_path)
     test_util.create_junit_xml_file([t], junit_path)
     # Pause to collect Stackdriver logs.

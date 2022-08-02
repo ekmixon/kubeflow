@@ -26,7 +26,7 @@ def test_endpoint_is_ready(record_xml_attribute, project, app_path, app_name, us
   """
   util.set_pytest_junit(record_xml_attribute, "test_endpoint_is_ready")
 
-  url = "https://{}.endpoints.{}.cloud.goog".format(app_name, project)
+  url = f"https://{app_name}.endpoints.{project}.cloud.goog"
   if use_basic_auth:
     with open(os.path.join(app_path, "login.json"), "r") as f:
       login = json.load(f)

@@ -42,7 +42,7 @@ def get_form_value(body, defaults, body_field, defaults_field=None):
 
     # field is not readonly
     if user_value is None:
-        raise BadRequest("No value provided for: %s" % body_field)
+        raise BadRequest(f"No value provided for: {body_field}")
 
     log.info("Using provided value for '%s': %s", body_field, user_value)
     return user_value
@@ -50,13 +50,7 @@ def get_form_value(body, defaults, body_field, defaults_field=None):
 
 # Volume handling functions
 def is_config_volume(vol):
-    if "name" not in vol:
-        return False
-
-    if not isinstance(vol["name"], dict):
-        return False
-
-    return True
+    return False if "name" not in vol else isinstance(vol["name"], dict)
 
 
 def volume_from_config(config_vol, notebook):
@@ -122,11 +116,8 @@ def set_notebook_image(notebook, body, defaults):
     """
     If the image is set to readOnly, use only the value from the config
     """
-    image_body_field = "image"
     is_custom_image = body.get("customImage", False)
-    if is_custom_image:
-        image_body_field = "customImage"
-
+    image_body_field = "customImage" if is_custom_image else "image"
     image = get_form_value(body, defaults, image_body_field, "image")
     notebook["spec"]["template"]["spec"]["containers"][0]["image"] = image
 
@@ -153,7 +144,7 @@ def set_server_type(notebook, body, defaults):
     rstudio_header = '{"X-RStudio-Root-Path":"/notebook/%s/%s/"}' % (nb_ns,
                                                                      nb_name)
     notebook_annotations[SERVER_TYPE_ANNOTATION] = server_type
-    if server_type == "group-one" or server_type == "group-two":
+    if server_type in ["group-one", "group-two"]:
         notebook_annotations[URI_REWRITE_ANNOTATION] = "/"
     if server_type == "group-two":
         notebook_annotations[HEADERS_ANNOTATION] = rstudio_header
@@ -164,11 +155,11 @@ def set_notebook_cpu(notebook, body, defaults):
 
     cpu = get_form_value(body, defaults, "cpu")
     if cpu and 'nan' in cpu.lower():
-        raise BadRequest("Invalid value for cpu: %s" % cpu)
+        raise BadRequest(f"Invalid value for cpu: {cpu}")
 
     cpu_limit = get_form_value(body, defaults, "cpuLimit")
     if cpu_limit and 'nan' in cpu_limit.lower():
-        raise BadRequest("Invalid value for cpu limit: %s" % cpu_limit)
+        raise BadRequest(f"Invalid value for cpu limit: {cpu_limit}")
 
     limit_factor = utils.load_spawner_ui_config()["cpu"].get("limitFactor")
     if not cpu_limit and limit_factor != "none":
@@ -193,11 +184,11 @@ def set_notebook_memory(notebook, body, defaults):
 
     memory = get_form_value(body, defaults, "memory")
     if memory and 'nan' in memory.lower():
-        raise BadRequest("Invalid value for memory: %s" % memory)
+        raise BadRequest(f"Invalid value for memory: {memory}")
 
     memory_limit = get_form_value(body, defaults, "memoryLimit")
     if memory_limit and 'nan' in memory_limit.lower():
-        raise BadRequest("Invalid value for memory limit: %s" % memory_limit)
+        raise BadRequest(f"Invalid value for memory limit: {memory_limit}")
 
     limit_factor = utils.load_spawner_ui_config()["memory"].get("limitFactor")
     if not memory_limit and limit_factor != "none":
@@ -288,7 +279,7 @@ def set_notebook_gpus(notebook, body, defaults):
     try:
         num = int(gpus["num"])
     except ValueError:
-        raise BadRequest("gpus.num is not a valid number: %s" % gpus["num"])
+        raise BadRequest(f'gpus.num is not a valid number: {gpus["num"]}')
 
     limits = container["resources"].get("limits", {})
     limits[vendor] = num
@@ -301,7 +292,7 @@ def set_notebook_configurations(notebook, body, defaults):
     labels = get_form_value(body, defaults, "configurations")
 
     if not isinstance(labels, list):
-        raise BadRequest("Labels for PodDefaults are not list: %s" % labels)
+        raise BadRequest(f"Labels for PodDefaults are not list: {labels}")
 
     for label in labels:
         notebook_labels[label] = "true"

@@ -17,7 +17,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Build Access Management using Kaniko
         dockerfile = ("%s/components/access-management"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/access-management/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/access-management/"
         destination = "access-management-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

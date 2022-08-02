@@ -33,10 +33,7 @@ def create_k8s_client():
   # talk to the APIServer.
   util.load_kube_config(persist_config=False)
 
-  # Create an API client object to talk to the K8s master.
-  api_client = k8s_client.ApiClient()
-
-  return api_client
+  return k8s_client.ApiClient()
 
 
 def _setup_test(api_client, run_label):
@@ -88,7 +85,7 @@ def setup_kubeflow_ks_app(dir, namespace, github_token, api_client):
     logging.warning("GITHUB_TOKEN not set; you will probably hit Github API "
                     "limits.")
   # Initialize a ksonnet app.
-  app_name = "kubeflow-test-" + uuid.uuid4().hex[0:4]
+  app_name = "kubeflow-test-" + uuid.uuid4().hex[:4]
   util.run([
       "ks",
       "init",
@@ -98,8 +95,10 @@ def setup_kubeflow_ks_app(dir, namespace, github_token, api_client):
   app_dir = os.path.join(dir, app_name)
 
   # Set the default namespace.
-  util.run(["ks", "env", "set", "default", "--namespace=" + namespace_name],
-           cwd=app_dir)
+  util.run(
+      ["ks", "env", "set", "default", f"--namespace={namespace_name}"],
+      cwd=app_dir,
+  )
 
   kubeflow_registry = "github.com/kubeflow/kubeflow/tree/master/kubeflow"
   util.run(["ks", "registry", "add", "kubeflow", kubeflow_registry],

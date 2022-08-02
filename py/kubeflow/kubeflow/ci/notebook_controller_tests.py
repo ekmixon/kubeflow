@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building Notebook Controller image using Kaniko
         dockerfile = ("%s/components/notebook-controller"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/"
         destination = "notebok-controller-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

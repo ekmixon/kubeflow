@@ -59,11 +59,10 @@ def get_viewer_owning_pod(pod):
     Return a list of PVCViewer names that own the Pod
     """
     owner_refs = pod.metadata.owner_references
-    for owner_ref in owner_refs:
-        if owner_ref.kind == KIND:
-            return owner_ref.name
-
-    return None
+    return next(
+        (owner_ref.name for owner_ref in owner_refs if owner_ref.kind == KIND),
+        None,
+    )
 
 
 def is_viewer_pod(pod):
@@ -77,11 +76,4 @@ def get_viewers_owning_pods(pods):
     """
     Return the name of PVCViewers that own a subset of the given Pods
     """
-    viewers = []
-    for pod in pods:
-        if not is_viewer_pod(pod):
-            continue
-
-        viewers.append(get_viewer_owning_pod(pod))
-
-    return viewers
+    return [get_viewer_owning_pod(pod) for pod in pods if is_viewer_pod(pod)]

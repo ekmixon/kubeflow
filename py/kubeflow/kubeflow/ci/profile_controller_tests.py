@@ -36,7 +36,7 @@ class Builder(workflow_utils.ArgoTestBuilder):
         # Test building Profile Controller image using Kaniko
         dockerfile = ("%s/components/profile-controller"
                       "/Dockerfile") % self.src_dir
-        context = "dir://%s/components/profile-controller/" % self.src_dir
+        context = f"dir://{self.src_dir}/components/profile-controller/"
         destination = "profile-controller-test"
 
         kaniko_task = self.create_kaniko_task(task_template, dockerfile,

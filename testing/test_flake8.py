@@ -79,15 +79,13 @@ def run(test_files_dirs, test_case):
               test_passed = parsed.get("pass", False)
 
             if not test_passed:
-              msg = '{} test failed'.format(test_file)
+              msg = f'{test_file} test failed'
               test_case.add_failure_info(msg)
-              logging.error(
-                  '{}. See Subprocess output for details.'.format(msg))
+              logging.error(f'{msg}. See Subprocess output for details.')
           except Exception as e:
-            msg = '{} test failed'.format(test_file)
+            msg = f'{test_file} test failed'
             test_case.add_failure_info(msg)
-            logging.error('{} with exception {}. See Subprocess output for '
-                          'details.'.format(msg, e))
+            logging.error(f'{msg} with exception {e}. See Subprocess output for details.')
 
 
 def parse_args():

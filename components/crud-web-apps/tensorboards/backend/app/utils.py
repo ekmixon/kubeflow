@@ -12,15 +12,13 @@ def parse_tensorboard(tensorboard):
         phase = status.STATUS_PHASE.UNAVAILABLE
         message = "The Tensorboard server is currently unavailble"
 
-    parsed_tensorboard = {
+    return {
         "name": tensorboard["metadata"]["name"],
         "namespace": tensorboard["metadata"]["namespace"],
         "logspath": tensorboard["spec"]["logspath"],
         "age": tensorboard["metadata"]["creationTimestamp"],
-        "status": status.create_status(phase, message, "")
+        "status": status.create_status(phase, message, ""),
     }
-
-    return parsed_tensorboard
 
 
 def get_tensorboard_dict(namespace, body):
@@ -28,11 +26,14 @@ def get_tensorboard_dict(namespace, body):
     Create Tensorboard object from request body and format it as a Python dict.
     """
 
-    tensorboard = {
+    return {
         "apiVersion": "tensorboard.kubeflow.org/v1alpha1",
         "kind": "Tensorboard",
-        "metadata": {"name": body["name"], "namespace": namespace, },
-        "spec": {"logspath": body["logspath"], },
+        "metadata": {
+            "name": body["name"],
+            "namespace": namespace,
+        },
+        "spec": {
+            "logspath": body["logspath"],
+        },
     }
-
-    return tensorboard

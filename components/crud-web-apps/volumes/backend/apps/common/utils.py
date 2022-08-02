@@ -14,7 +14,7 @@ def parse_pvc(pvc):
     except Exception:
         capacity = pvc.spec.resources.requests["storage"]
 
-    parsed_pvc = {
+    return {
         "name": pvc.metadata.name,
         "namespace": pvc.metadata.namespace,
         "status": status.pvc_status(pvc),
@@ -28,8 +28,6 @@ def parse_pvc(pvc):
         "modes": pvc.spec.access_modes,
         "class": pvc.spec.storage_class_name,
     }
-
-    return parsed_pvc
 
 
 def get_pods_using_pvc(pvc, namespace):
@@ -58,11 +56,10 @@ def get_pod_pvcs(pod):
         return []
 
     vols = pod.spec.volumes
-    for vol in vols:
-        # Check if the volume is a pvc
-        if not vol.persistent_volume_claim:
-            continue
-
-        pvcs.append(vol.persistent_volume_claim.claim_name)
+    pvcs.extend(
+        vol.persistent_volume_claim.claim_name
+        for vol in vols
+        if vol.persistent_volume_claim
+    )
 
     return pvcs
